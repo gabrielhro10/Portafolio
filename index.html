@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Portafolio de aplicaciones web de Gabriel: herramientas gratuitas que funcionan en el navegador.">
+    <meta name="color-scheme" content="light dark">
+    <title>Portafolio · gabrielhro10</title>
+    <style>
+        :root {
+            --bg: #f6f7f9;
+            --card: #ffffff;
+            --text: #1c2128;
+            --muted: #5b6573;
+            --border: #e1e5ea;
+            --accent: #0b63ce;
+            --accent-text: #ffffff;
+            --chip: #e8eef7;
+            --shadow: 0 1px 3px rgba(16, 24, 40, .08);
+            --shadow-hover: 0 6px 18px rgba(16, 24, 40, .12);
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f1318;
+                --card: #181d24;
+                --text: #e6e9ee;
+                --muted: #9aa5b4;
+                --border: #2a313b;
+                --accent: #4c9aff;
+                --accent-text: #08111f;
+                --chip: #232b36;
+                --shadow: none;
+                --shadow-hover: 0 6px 18px rgba(0, 0, 0, .4);
+            }
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+        }
+        a { color: var(--accent); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+        .wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+        header { padding: 40px 0 20px; }
+        h1 { margin: 0; font-size: clamp(1.6rem, 4vw, 2.2rem); letter-spacing: -.02em; }
+        .sub { margin: 4px 0 0; color: var(--muted); font-size: .95rem; }
+
+        .toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0 12px; }
+        .toolbar input, .toolbar select {
+            font: inherit; color: inherit; background: var(--card);
+            border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px;
+        }
+        .toolbar input { flex: 1 1 220px; min-width: 0; }
+
+        .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+        .chip {
+            font: inherit; font-size: .85rem; cursor: pointer;
+            background: var(--chip); color: var(--text);
+            border: 1px solid transparent; border-radius: 999px; padding: 4px 12px;
+        }
+        .chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-text); }
+
+        .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); padding-bottom: 48px; }
+        .card {
+            display: flex; flex-direction: column; gap: 10px;
+            background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+            padding: 18px; box-shadow: var(--shadow); transition: box-shadow .15s, transform .15s;
+        }
+        .card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
+        .card h2 { margin: 0; font-size: 1.1rem; overflow-wrap: anywhere; }
+        .card h2 a { color: var(--text); }
+        .desc { margin: 0; color: var(--muted); font-size: .92rem; flex: 1; }
+        .meta { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: .82rem; color: var(--muted); }
+        .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--accent); margin-right: 5px; }
+        .topics { display: flex; flex-wrap: wrap; gap: 6px; }
+        .topic { background: var(--chip); border-radius: 999px; padding: 1px 9px; font-size: .75rem; }
+        .actions { display: flex; gap: 8px; margin-top: 4px; }
+        .btn {
+            flex: 1; text-align: center; padding: 8px 12px; border-radius: 8px; font-size: .9rem;
+            border: 1px solid var(--border); color: var(--text);
+        }
+        .btn:hover { text-decoration: none; border-color: var(--accent); }
+        .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); font-weight: 600; }
+        .btn.primary:hover { filter: brightness(1.08); }
+
+        .skeleton { height: 190px; border-radius: 12px; background: linear-gradient(90deg, var(--card), var(--chip), var(--card)); background-size: 200% 100%; animation: shimmer 1.4s infinite; border: 1px solid var(--border); }
+        @keyframes shimmer { to { background-position: -200% 0; } }
+        @media (prefers-reduced-motion: reduce) { .skeleton { animation: none; } .card { transition: none; } }
+
+        .state { text-align: center; padding: 48px 16px; color: var(--muted); grid-column: 1 / -1; }
+        .state button { font: inherit; margin-top: 10px; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; }
+
+        footer { border-top: 1px solid var(--border); padding: 20px 0 40px; color: var(--muted); font-size: .85rem; }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <header>
+            <h1>Mis aplicaciones</h1>
+            <p class="sub" id="summary">Cargando proyectos…</p>
+        </header>
+
+        <div class="toolbar">
+            <input type="search" id="search" placeholder="Buscar proyecto…" aria-label="Buscar proyecto" autocomplete="off">
+            <select id="sort" aria-label="Ordenar por">
+                <option value="updated">Más recientes</option>
+                <option value="name">Nombre (A–Z)</option>
+                <option value="stars">Más estrellas</option>
+            </select>
+        </div>
+        <div class="chips" id="chips" role="group" aria-label="Filtrar por categoría"></div>
+
+        <main class="grid" id="grid" aria-live="polite">
+            <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+        </main>
+
+        <footer id="footer"></footer>
+    </div>
+
+    <script>
+        const grid = document.getElementById('grid');
+        const chipsEl = document.getElementById('chips');
+        const searchEl = document.getElementById('search');
+        const sortEl = document.getElementById('sort');
+
+        let projects = [];
+        let activeFilter = 'Todos';
+
+        // Solo permite http(s) para evitar esquemas como javascript:
+        const safeUrl = u => { try { return /^https?:$/.test(new URL(u).protocol) ? u : null; } catch { return null; } };
+
+        function el(tag, props = {}, ...children) {
+            const node = document.createElement(tag);
+            for (const [k, v] of Object.entries(props)) {
+                if (k === 'class') node.className = v;
+                else if (k === 'text') node.textContent = v;
+                else node.setAttribute(k, v);
+            }
+            node.append(...children.filter(Boolean));
+            return node;
+        }
+
+        const timeAgo = iso => {
+            const days = Math.floor((Date.now() - new Date(iso)) / 864e5);
+            if (days < 1) return 'hoy';
+            if (days < 30) return `hace ${days} d`;
+            if (days < 365) return `hace ${Math.floor(days / 30)} meses`;
+            return `hace ${Math.floor(days / 365)} a`;
+        };
+
+        function card(p) {
+            const live = safeUrl(p.homepage);
+            const code = safeUrl(p.url);
+            const rel = safeUrl(p.releaseUrl);
+
+            const meta = el('div', { class: 'meta' },
+                p.language && el('span', {}, el('span', { class: 'dot' }), p.language),
+                p.version && (rel
+                    ? el('a', { href: rel, target: '_blank', rel: 'noopener', text: p.version })
+                    : el('span', { text: p.version })),
+                p.stars > 0 && el('span', { text: `★ ${p.stars}` }),
+                el('span', { text: `Actualizado ${timeAgo(p.updatedAt)}` })
+            );
+
+            return el('article', { class: 'card' },
+                el('h2', {}, code
+                    ? el('a', { href: code, target: '_blank', rel: 'noopener', text: p.name })
+                    : el('span', { text: p.name })),
+                el('p', { class: 'desc', text: p.description || 'Sin descripción.' }),
+                p.topics.length > 0 && el('div', { class: 'topics' }, ...p.topics.map(t => el('span', { class: 'topic', text: t }))),
+                meta,
+                el('div', { class: 'actions' },
+                    live && el('a', { class: 'btn primary', href: live, target: '_blank', rel: 'noopener', text: 'Abrir app' }),
+                    code && el('a', { class: 'btn', href: code, target: '_blank', rel: 'noopener', text: 'Código ↗' })
+                )
+            );
+        }
+
+        function render() {
+            const q = searchEl.value.trim().toLowerCase();
+            const sorters = {
+                updated: (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt),
+                name: (a, b) => a.name.localeCompare(b.name),
+                stars: (a, b) => b.stars - a.stars
+            };
+
+            const list = projects
+                .filter(p => activeFilter === 'Todos' || p.language === activeFilter || p.topics.includes(activeFilter))
+                .filter(p => !q || `${p.name} ${p.description} ${p.topics.join(' ')}`.toLowerCase().includes(q))
+                .sort(sorters[sortEl.value]);
+
+            grid.replaceChildren(...(list.length
+                ? list.map(card)
+                : [el('div', { class: 'state', text: 'Ningún proyecto coincide con la búsqueda.' })]));
+        }
+
+        function renderChips() {
+            const counts = new Map();
+            for (const p of projects) {
+                for (const k of new Set([p.language, ...p.topics].filter(Boolean))) {
+                    counts.set(k, (counts.get(k) || 0) + 1);
+                }
+            }
+            const keys = ['Todos', ...[...counts.keys()].sort((a, b) => counts.get(b) - counts.get(a))];
+            chipsEl.replaceChildren(...keys.map(k => {
+                const b = el('button', { class: 'chip', type: 'button', 'aria-pressed': String(k === activeFilter), text: k });
+                b.addEventListener('click', () => {
+                    activeFilter = k;
+                    renderChips();
+                    render();
+                });
+                return b;
+            }));
+        }
+
+        async function load() {
+            grid.replaceChildren(el('div', { class: 'skeleton' }), el('div', { class: 'skeleton' }), el('div', { class: 'skeleton' }));
+            try {
+                const res = await fetch('projects.json', { cache: 'no-cache' });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                projects = data.projects;
+
+                document.getElementById('summary').textContent =
+                    `${projects.length} proyectos · actualizado ${timeAgo(data.generatedAt)}`;
+                const footer = document.getElementById('footer');
+                const ghUrl = `https://github.com/${encodeURIComponent(data.user)}`;
+                footer.replaceChildren('Datos tomados de ', el('a', { href: ghUrl, target: '_blank', rel: 'noopener', text: `github.com/${data.user}` }), '.');
+
+                renderChips();
+                render();
+            } catch (err) {
+                console.error(err);
+                const retry = el('button', { type: 'button', text: 'Reintentar' });
+                retry.addEventListener('click', load);
+                grid.replaceChildren(el('div', { class: 'state' },
+                    el('p', { text: 'No se pudo cargar projects.json.' }),
+                    el('p', { text: 'Si abriste el archivo con doble clic, usa un servidor local o GitHub Pages: el navegador bloquea fetch en file://.' }),
+                    retry));
+                document.getElementById('summary').textContent = 'Error al cargar';
+            }
+        }
+
+        searchEl.addEventListener('input', render);
+        sortEl.addEventListener('change', render);
+        load();
+    </script>
+</body>
+</html>
