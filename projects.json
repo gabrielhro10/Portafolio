@@ -1,6 +1,6 @@
 {
   "user": "gabrielhro10",
-  "generatedAt": "2026-10-24T03:34:30.801Z",
+  "generatedAt": "2026-10-24T03:36:33.977Z",
   "projects": [
     {
       "name": "WebMediaStream",
@@ -13,6 +13,20 @@
       "topics": [],
       "stars": 0,
       "updatedAt": "2026-10-24T03:06:04Z",
+      "version": null,
+      "releaseUrl": null
+    },
+    {
+      "name": "videoZIP",
+      "title": "videoZIP",
+      "description": "Comprime los videos de una carpeta en tu propio dispositivo. Nada se sube a internet.",
+      "icon": "https://vzip.gerrom11.workers.dev/icons/icon-192.png",
+      "url": null,
+      "homepage": "https://vzip.gerrom11.workers.dev/",
+      "language": "JavaScript",
+      "topics": [],
+      "stars": 0,
+      "updatedAt": "2026-10-24T00:08:42Z",
       "version": null,
       "releaseUrl": null
     },
