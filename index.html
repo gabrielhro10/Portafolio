@@ -72,6 +72,11 @@
             padding: 18px; box-shadow: var(--shadow); transition: box-shadow .15s, transform .15s;
         }
         .card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
+        .head { display: flex; align-items: center; gap: 12px; }
+        .titles { min-width: 0; }
+        .repo { font-size: .78rem; color: var(--muted); }
+        .icon { width: 48px; height: 48px; flex: none; border-radius: 11px; object-fit: cover; background: var(--chip); border: 1px solid var(--border); }
+        .icon.letter { display: grid; place-items: center; font-weight: 700; font-size: 1.3rem; color: var(--accent); }
         .card h2 { margin: 0; font-size: 1.1rem; overflow-wrap: anywhere; }
         .card h2 a { color: var(--text); }
         .desc { margin: 0; color: var(--muted); font-size: .92rem; flex: 1; }
@@ -153,6 +158,16 @@
             return `hace ${Math.floor(days / 365)} a`;
         };
 
+        // Icono de la app; si no existe o falla la carga, muestra la inicial del nombre.
+        function icon(p) {
+            const fallback = () => el('span', { class: 'icon letter', 'aria-hidden': 'true', text: (p.title || p.name).charAt(0).toUpperCase() });
+            const src = safeUrl(p.icon);
+            if (!src) return fallback();
+            const img = el('img', { class: 'icon', src, alt: '', width: '48', height: '48', loading: 'lazy' });
+            img.addEventListener('error', () => img.replaceWith(fallback()));
+            return img;
+        }
+
         function card(p) {
             const live = safeUrl(p.homepage);
             const code = safeUrl(p.url);
@@ -167,10 +182,17 @@
                 el('span', { text: `Actualizado ${timeAgo(p.updatedAt)}` })
             );
 
+            const title = p.title || p.name;
+            const titleEl = live
+                ? el('a', { href: live, target: '_blank', rel: 'noopener', text: title })
+                : el('span', { text: title });
+
             return el('article', { class: 'card' },
-                el('h2', {}, code
-                    ? el('a', { href: code, target: '_blank', rel: 'noopener', text: p.name })
-                    : el('span', { text: p.name })),
+                el('div', { class: 'head' },
+                    icon(p),
+                    el('div', { class: 'titles' },
+                        el('h2', {}, titleEl),
+                        title !== p.name && el('span', { class: 'repo', text: p.name }))),
                 el('p', { class: 'desc', text: p.description || 'Sin descripción.' }),
                 p.topics.length > 0 && el('div', { class: 'topics' }, ...p.topics.map(t => el('span', { class: 'topic', text: t }))),
                 meta,

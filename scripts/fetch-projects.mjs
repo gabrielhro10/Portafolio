@@ -44,6 +44,35 @@ async function listRepos() {
     return all;
 }
 
+// Lee el manifest PWA de la app desplegada (icono, nombre, descripción). Si algo falla, devuelve {}.
+async function readManifest(homepage) {
+    if (!homepage) return {};
+    try {
+        const base = new URL(homepage);
+        const html = await fetch(base, { signal: AbortSignal.timeout(10000) }).then(r => (r.ok ? r.text() : ''));
+        const href = html.match(/<link[^>]+rel=["']manifest["'][^>]*>/i)?.[0].match(/href=["']([^"']+)["']/i)?.[1];
+        const manifestUrl = new URL(href || 'manifest.webmanifest', base);
+        const res = await fetch(manifestUrl, { signal: AbortSignal.timeout(10000) });
+        if (!res.ok) return {};
+        const m = await res.json();
+
+        // Prefiere icono "any" (no maskable), PNG y de tamaño cercano a 192; el SVG queda como último recurso.
+        const score = i => {
+            if (/maskable/.test(i.purpose || '') && !/any/.test(i.purpose)) return -1;
+            if (/svg/.test(i.type || '') || i.sizes === 'any') return 1;
+            return 1000 - Math.abs(parseInt(i.sizes, 10) - 192);
+        };
+        const best = (m.icons || []).filter(i => score(i) >= 0).sort((a, b) => score(b) - score(a))[0];
+        return {
+            icon: best ? new URL(best.src, manifestUrl).href : null,
+            title: m.name || m.short_name || null,
+            description: m.description || null
+        };
+    } catch {
+        return {};
+    }
+}
+
 // Públicos: todos. Privados: solo con el topic de inclusión y una URL de despliegue.
 const repos = (await listRepos()).filter(r => {
     if (r.fork || r.archived || EXCLUDE.has(r.name.toLowerCase())) return false;
@@ -56,11 +85,15 @@ const projects = await Promise.all(
         // Los repos privados no exponen enlaces a GitHub (darían 404 a los visitantes).
         const release = r.private ? null : await gh(`/repos/${USER}/${r.name}/releases/latest`);
         const pagesUrl = r.has_pages && !r.private ? `https://${USER}.github.io/${r.name}/` : null;
+        const homepage = r.homepage || pagesUrl;
+        const manifest = await readManifest(homepage);
         return {
             name: r.name,
-            description: r.description || '',
+            title: manifest.title || r.name,
+            description: r.description || manifest.description || '',
+            icon: manifest.icon || null,
             url: r.private ? null : r.html_url,
-            homepage: r.homepage || pagesUrl,
+            homepage,
             language: r.language,
             topics: (r.topics || []).filter(t => t !== INCLUDE_TOPIC),
             stars: r.private ? 0 : r.stargazers_count,
